@@ -32,31 +32,25 @@ body {
   animation-play-state: paused;
 }
 
-/* Classic Newspaper Spin & Drop Effect */
-@keyframes newspaperDrop {
+/* Gentle paper drop animation from behind with subtle landing */
+@keyframes gentlePaperDrop {
   0% {
     opacity: 0;
-    transform: perspective(1000px) scale(0.15) rotate(-540deg) translateY(-280px);
-    filter: blur(8px);
+    transform: perspective(1000px) translateY(-50px) scale(0.92) rotate(-1.5deg);
   }
-  65% {
+  70% {
     opacity: 1;
-    transform: perspective(1000px) scale(1.06) rotate(4deg) translateY(10px);
-    filter: blur(0px);
-  }
-  82% {
-    transform: perspective(1000px) scale(0.97) rotate(-2deg) translateY(-3px);
+    transform: perspective(1000px) translateY(4px) scale(1.01) rotate(0.4deg);
   }
   100% {
     opacity: 1;
-    transform: perspective(1000px) scale(1) rotate(0deg) translateY(0);
-    filter: blur(0px);
+    transform: perspective(1000px) translateY(0) scale(1) rotate(0deg);
   }
 }
 
 .animate-newspaper-drop {
-  animation: newspaperDrop 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-  will-change: transform, opacity, filter;
+  animation: gentlePaperDrop 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity;
 }
 
 @keyframes timerProgress {
