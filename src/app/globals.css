@@ -11,3 +11,23 @@ body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
 }
+
+@keyframes conveyor {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-conveyor {
+  display: flex;
+  width: max-content;
+  animation: conveyor 32s linear infinite;
+  will-change: transform;
+}
+
+.animate-conveyor:hover {
+  animation-play-state: paused;
+}
