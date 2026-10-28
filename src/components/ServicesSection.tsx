@@ -34,7 +34,7 @@ export default function ServicesSection() {
   ];
 
   return (
-    <section id="services" className="relative py-20 sm:py-24 bg-[#FAFAFC] border-b border-slate-200/80">
+    <section id="services" className="relative py-20 sm:py-28 bg-[#FAFAFC] border-b border-slate-200/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header matching Links Infotech reference */}
         <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-16">
@@ -49,68 +49,78 @@ export default function ServicesSection() {
           </p>
         </div>
 
-        {/* 4 Cards matching Links Infotech visual layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-          {ORIGINAL_SERVICES.map((srv) => (
-            <div
-              key={srv.id}
-              className="group relative bg-white rounded-[26px] p-7 border border-slate-100 shadow-[0_4px_25px_-5px_rgba(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden"
-            >
-              {/* Soft warm yellow/cream circle arc in the top right corner */}
-              <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-[#FEF6E9] pointer-events-none group-hover:scale-110 transition-transform duration-500 ease-out" />
+        {/* 4 Cards with Ladder / Staggered Step Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7 mb-28 items-start">
+          {ORIGINAL_SERVICES.map((srv, idx) => {
+            // Ladder alternating offsets:
+            // 2-column view (tablet): card 0 normal, card 1 shifted down, card 2 normal, card 3 shifted down
+            // 4-column view (desktop): step wave (0: normal, 1: +8, 2: 0, 3: +8)
+            const ladderOffsetClass =
+              idx % 2 === 1
+                ? 'md:translate-y-8 lg:translate-y-10'
+                : 'md:translate-y-0 lg:translate-y-0';
 
-              <div>
-                {/* Icon box on top left */}
-                <div className="w-12 h-12 rounded-2xl bg-[#F5F3FF] border border-[#EDE9FE]/70 flex items-center justify-center mb-5 shadow-sm group-hover:bg-[#EDE9FE] transition-colors duration-200">
-                  {getServiceIcon(srv.id)}
-                </div>
+            return (
+              <div
+                key={srv.id}
+                className={`group relative bg-white rounded-[26px] p-7 border border-slate-100 shadow-[0_4px_25px_-5px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between overflow-hidden ${ladderOffsetClass}`}
+              >
+                {/* Soft warm yellow/cream circle arc in the top right corner */}
+                <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-[#FEF6E9] pointer-events-none group-hover:scale-110 transition-transform duration-500 ease-out" />
 
-                {/* Pill Badge */}
-                <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-[#6B21A8] bg-[#F5F3FF] border border-[#DDD6FE]/60 px-2.5 py-0.5 rounded-full mb-3">
-                  {srv.badge}
-                </span>
+                <div>
+                  {/* Icon box on top left */}
+                  <div className="w-12 h-12 rounded-2xl bg-[#F5F3FF] border border-[#EDE9FE]/70 flex items-center justify-center mb-5 shadow-sm group-hover:bg-[#EDE9FE] transition-colors duration-200">
+                    {getServiceIcon(srv.id)}
+                  </div>
 
-                {/* Title */}
-                <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-snug">
-                  {srv.title}
-                </h3>
-
-                {/* Description */}
-                <p className="text-xs text-slate-500 leading-relaxed mt-2.5 min-h-[45px] font-normal">
-                  {srv.description}
-                </p>
-
-                {/* Pill Chips */}
-                <div className="mt-5 flex flex-wrap gap-1.5">
-                  {srv.chips.map((chip, cIdx) => (
-                    <span
-                      key={cIdx}
-                      className="text-[11px] font-medium text-slate-600 bg-slate-100/90 px-2.5 py-1 rounded-full"
-                    >
-                      {chip}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Bottom Explore Link */}
-              <div className="mt-6 pt-4 border-t border-slate-100">
-                <a
-                  href={`https://wa.me/919327107280?text=Hello%20Version%20Computers,%20I%20am%20interested%20in%20inquiring%20about:%20*${encodeURIComponent(
-                    srv.title
-                  )}*.%20Please%20share%20quotation%20and%20availability.`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors group/link"
-                >
-                  <span>{srv.linkText}</span>
-                  <span className="ml-1 text-sm transition-transform duration-200 group-hover/link:translate-x-1">
-                    →
+                  {/* Pill Badge */}
+                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-[#6B21A8] bg-[#F5F3FF] border border-[#DDD6FE]/60 px-2.5 py-0.5 rounded-full mb-3">
+                    {srv.badge}
                   </span>
-                </a>
+
+                  {/* Title */}
+                  <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-snug">
+                    {srv.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-xs text-slate-500 leading-relaxed mt-2.5 min-h-[45px] font-normal">
+                    {srv.description}
+                  </p>
+
+                  {/* Pill Chips */}
+                  <div className="mt-5 flex flex-wrap gap-1.5">
+                    {srv.chips.map((chip, cIdx) => (
+                      <span
+                        key={cIdx}
+                        className="text-[11px] font-medium text-slate-600 bg-slate-100/90 px-2.5 py-1 rounded-full"
+                      >
+                        {chip}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bottom Explore Link */}
+                <div className="mt-6 pt-4 border-t border-slate-100">
+                  <a
+                    href={`https://wa.me/919327107280?text=Hello%20Version%20Computers,%20I%20am%20interested%20in%20inquiring%20about:%20*${encodeURIComponent(
+                      srv.title
+                    )}*.%20Please%20share%20quotation%20and%20availability.`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors group/link"
+                  >
+                    <span>{srv.linkText}</span>
+                    <span className="ml-1 text-sm transition-transform duration-200 group-hover/link:translate-x-1">
+                      →
+                    </span>
+                  </a>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
