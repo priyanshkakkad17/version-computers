@@ -8,30 +8,61 @@ import {
   Network,
   Layers,
   ArrowRight,
+  ChevronDown,
   CheckCircle2,
   Sparkles,
 } from 'lucide-react';
 
 export default function ServicesSection() {
   const ladderRef = useRef<HTMLDivElement>(null);
-  const [scrollProgress, setScrollProgress] = useState<number>(0);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [linePixelHeight, setLinePixelHeight] = useState<number>(0);
+  const [activeNodes, setActiveNodes] = useState<boolean[]>([false, false, false, false]);
 
   useEffect(() => {
-    const handleScroll = () => {
+    let animationFrameId: number;
+
+    const updateScrollProgress = () => {
       if (!ladderRef.current) return;
-      const rect = ladderRef.current.getBoundingClientRect();
+      const ladderRect = ladderRef.current.getBoundingClientRect();
       const windowHeight = window.innerHeight;
 
-      // Start filling when top of ladder enters halfway from bottom
-      const totalDist = rect.height;
-      const currentPassed = windowHeight * 0.7 - rect.top;
-      const progress = Math.min(Math.max(currentPassed / totalDist, 0), 1);
-      setScrollProgress(progress);
+      // Smooth trigger point: when line tip reaches 58% down the viewport
+      const triggerY = windowHeight * 0.58;
+      const distanceIntoLadder = triggerY - ladderRect.top;
+      const totalLadderHeight = ladderRect.height;
+
+      // Exact pixel height for silky smooth 60fps tracking
+      const clampedHeight = Math.min(Math.max(distanceIntoLadder, 0), totalLadderHeight);
+      setLinePixelHeight(clampedHeight);
+
+      // Check each card's actual vertical center in the ladder
+      const newActive = ORIGINAL_SERVICES.map((_, idx) => {
+        const cardEl = cardRefs.current[idx];
+        if (!cardEl) return false;
+        const cardRect = cardEl.getBoundingClientRect();
+        const cardCenterY = cardRect.top + cardRect.height / 2;
+        // Node circle glows when the center line head crosses its vertical position
+        return triggerY >= cardCenterY;
+      });
+
+      setActiveNodes(newActive);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = requestAnimationFrame(updateScrollProgress);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    updateScrollProgress();
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      cancelAnimationFrame(animationFrameId);
+    };
   }, []);
 
   const getServiceIcon = (id: string) => {
@@ -89,15 +120,26 @@ export default function ServicesSection() {
 
           {/* Dynamic Scroll-Activated Moving Center Line */}
           <div
-            className="hidden md:block absolute left-1/2 top-4 -translate-x-1/2 w-1 bg-gradient-to-b from-blue-600 via-indigo-600 to-sky-400 rounded-full transition-all duration-150 ease-out z-10"
+            className="hidden md:block absolute left-1/2 top-4 -translate-x-1/2 w-1 bg-gradient-to-b from-blue-600 via-blue-500 to-indigo-600 rounded-full will-change-[height] z-10"
             style={{
-              height: `calc(${scrollProgress * 100}% - 32px)`,
-              maxHeight: 'calc(100% - 32px)',
+              height: `${linePixelHeight}px`,
             }}
           >
-            {/* Glowing tracer spark at the head of the moving line */}
-            {scrollProgress > 0.05 && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-blue-500 shadow-[0_0_12px_#3b82f6] animate-pulse" />
+            {/* 
+              Arrow replaces the moving center line head circle:
+              Pointing downward in the direction of the scroll movement
+            */}
+            {linePixelHeight > 10 && (
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center">
+                {/* Pulsating radiant glow halo around arrow */}
+                <span className="absolute w-10 h-10 rounded-full bg-blue-500/30 blur-md animate-ping" />
+                <span className="absolute w-8 h-8 rounded-full bg-blue-600/40 blur-sm" />
+                
+                {/* Arrow head container */}
+                <div className="relative w-7 h-7 rounded-full bg-blue-600 border-2 border-white shadow-[0_0_16px_#2563eb] flex items-center justify-center text-white">
+                  <ChevronDown className="w-4 h-4 stroke-[3] animate-bounce" />
+                </div>
+              </div>
             )}
           </div>
 
@@ -105,25 +147,43 @@ export default function ServicesSection() {
           <div className="space-y-12 md:space-y-16">
             {ORIGINAL_SERVICES.map((srv, idx) => {
               const isEven = idx % 2 === 0; // 0, 2 on Left; 1, 3 on Right
-              const stepRatio = (idx + 0.3) / ORIGINAL_SERVICES.length;
-              const isPassed = scrollProgress >= stepRatio;
+              const isPassed = activeNodes[idx];
 
               return (
                 <div
                   key={srv.id}
+                  ref={(el) => {
+                    cardRefs.current[idx] = el;
+                  }}
                   className="relative grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center"
                 >
                   {/* Left Column Slot */}
                   <div className={`${isEven ? 'md:order-1' : 'md:order-2 md:col-start-2'}`}>
-                    <div className="group relative bg-white rounded-3xl p-7 sm:p-8 border border-slate-200/80 shadow-[0_10px_35px_-10px_rgba(15,23,42,0.06)] hover:shadow-2xl hover:border-blue-500 transition-all duration-300 overflow-hidden hover:-translate-y-1">
-                      {/* Top accent gradient bar on hover */}
-                      <span className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div
+                      className={`group relative bg-white rounded-3xl p-7 sm:p-8 border transition-all duration-500 overflow-hidden ${
+                        isPassed
+                          ? 'border-blue-400 shadow-[0_12px_40px_-10px_rgba(37,99,235,0.12)]'
+                          : 'border-slate-200/80 shadow-[0_10px_35px_-10px_rgba(15,23,42,0.06)]'
+                      } hover:shadow-2xl hover:border-blue-500 hover:-translate-y-1`}
+                    >
+                      {/* Top accent gradient bar on hover or when crossed */}
+                      <span
+                        className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 transition-opacity duration-300 ${
+                          isPassed ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                        }`}
+                      />
 
                       {/* Header with Icon, Step Number and Pill Badge */}
                       <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-3.5">
-                          <div className="w-13 h-13 p-3 rounded-2xl bg-blue-50/80 border border-blue-100/90 flex items-center justify-center shadow-inner group-hover:bg-blue-600 transition-colors duration-300">
-                            <div className="group-hover:brightness-0 group-hover:invert transition-all duration-300">
+                          <div
+                            className={`w-13 h-13 p-3 rounded-2xl border flex items-center justify-center shadow-inner transition-all duration-300 ${
+                              isPassed
+                                ? 'bg-blue-600 text-white border-blue-600 shadow-blue-500/20'
+                                : 'bg-blue-50/80 text-blue-600 border-blue-100/90 group-hover:bg-blue-600 group-hover:text-white'
+                            }`}
+                          >
+                            <div className={isPassed ? 'brightness-0 invert' : 'group-hover:brightness-0 group-hover:invert transition-all duration-300'}>
                               {getServiceIcon(srv.id)}
                             </div>
                           </div>
@@ -135,7 +195,11 @@ export default function ServicesSection() {
                         </div>
 
                         {/* Step Marker Badge */}
-                        <span className="text-xs font-mono font-bold text-slate-300 group-hover:text-blue-600 transition-colors tracking-widest">
+                        <span
+                          className={`text-xs font-mono font-bold tracking-widest transition-colors ${
+                            isPassed ? 'text-blue-600 font-extrabold' : 'text-slate-300 group-hover:text-blue-600'
+                          }`}
+                        >
                           STEP 0{idx + 1}
                         </span>
                       </div>
@@ -184,34 +248,42 @@ export default function ServicesSection() {
                     </div>
                   </div>
 
-                  {/* Central Ladder Step Node (only visible on tablet & desktop) */}
+                  {/* Central Ladder Step Node Circle that glows when the line crosses */}
                   <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center justify-center pointer-events-none z-20">
                     <div
-                      className={`w-10 h-10 rounded-full bg-white border-4 transition-all duration-500 flex items-center justify-center shadow-md ${
+                      className={`relative w-11 h-11 rounded-full bg-white border-4 transition-all duration-500 flex items-center justify-center ${
                         isPassed
-                          ? 'border-blue-600 scale-110 shadow-blue-500/30'
-                          : 'border-slate-300'
+                          ? 'border-blue-600 scale-110 shadow-[0_0_24px_rgba(37,99,235,0.45)] ring-4 ring-blue-400/20'
+                          : 'border-slate-300 shadow-sm'
                       }`}
                     >
+                      {/* Outer pulse aura when active */}
+                      {isPassed && (
+                        <span className="absolute -inset-1 rounded-full bg-blue-500/20 blur-sm animate-pulse" />
+                      )}
+
+                      {/* Inner Glowing Blue Dot */}
                       <span
-                        className={`w-3.5 h-3.5 rounded-full transition-colors duration-500 ${
-                          isPassed ? 'bg-blue-600' : 'bg-slate-300'
+                        className={`relative w-4 h-4 rounded-full transition-all duration-500 ${
+                          isPassed
+                            ? 'bg-blue-600 shadow-[0_0_12px_#2563eb] scale-110'
+                            : 'bg-slate-300'
                         }`}
                       />
                     </div>
 
-                    {/* Horizontal ladder rung connecting to card */}
+                    {/* Horizontal ladder rung connecting to card with glow */}
                     <div
-                      className={`absolute top-1/2 -translate-y-1/2 h-0.5 transition-all duration-500 ${
+                      className={`absolute top-1/2 -translate-y-1/2 h-1 transition-all duration-500 ${
                         isEven
-                          ? `right-1/2 w-8 ${
+                          ? `right-1/2 w-10 ${
                               isPassed
-                                ? 'bg-gradient-to-r from-transparent to-blue-600'
+                                ? 'bg-gradient-to-r from-transparent via-blue-500 to-blue-600 shadow-[0_0_8px_#3b82f6]'
                                 : 'bg-gradient-to-r from-transparent to-slate-200'
                             }`
-                          : `left-1/2 w-8 ${
+                          : `left-1/2 w-10 ${
                               isPassed
-                                ? 'bg-gradient-to-r from-blue-600 to-transparent'
+                                ? 'bg-gradient-to-r from-blue-600 via-blue-500 to-transparent shadow-[0_0_8px_#3b82f6]'
                                 : 'bg-gradient-to-r from-slate-200 to-transparent'
                             }`
                       }`}
