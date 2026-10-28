@@ -112,61 +112,61 @@ export default function ServicesSection() {
             </div>
           ))}
         </div>
+      </div>
 
-        {/* Brands We Work With / Authorized Distributors Banner - Conveyor Belt */}
-        <div id="distributors" className="pt-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm overflow-hidden">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-5 border-b border-slate-100">
-              <div className="inline-flex items-center gap-2">
-                <span className="px-3.5 py-1 rounded-full bg-[#F3E8FF] text-[#6B21A8] text-[11px] font-bold uppercase tracking-wider">
-                  BRANDS WE WORK WITH
-                </span>
-                <span className="text-xs font-semibold text-slate-400 hidden sm:inline">
-                  • Authorized Distribution
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <p className="text-[11px] sm:text-xs text-slate-500 font-normal">
-                  Hover over any brand to pause rotation
-                </p>
-              </div>
+      {/* Brands We Work With / Authorized Distributors - Full-width embedded directly in page without box container */}
+      <div id="distributors" className="pt-6 border-t border-slate-200/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="inline-flex items-center gap-2">
+              <span className="px-3.5 py-1 rounded-full bg-[#F3E8FF] text-[#6B21A8] text-[11px] font-bold uppercase tracking-wider">
+                BRANDS WE WORK WITH
+              </span>
+              <span className="text-xs font-semibold text-slate-400 hidden sm:inline">
+                • Authorized Distribution
+              </span>
             </div>
-
-            {/* Conveyor Belt Rotating Track with Gradient Edge Fades */}
-            <div className="relative overflow-hidden py-2">
-              {/* Left and right fade gradient edges */}
-              <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
-              <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
-
-              {/* Moving conveyor belt */}
-              <div className="animate-conveyor gap-5 items-stretch py-2">
-                {conveyorDistributors.map((dist, idx) => (
-                  <div
-                    key={idx}
-                    className="group w-52 sm:w-60 shrink-0 bg-slate-50/70 hover:bg-white p-4 rounded-2xl border border-slate-200/80 hover:border-blue-400 hover:shadow-xl transition-all duration-300 text-center flex flex-col items-center justify-between min-h-[135px]"
-                  >
-                    <div className="h-14 w-full flex items-center justify-center p-1">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={dist.logo}
-                        alt={`${dist.name} Authorized Distributor`}
-                        className="max-h-11 max-w-[110px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105"
-                      />
-                    </div>
-
-                    <div className="pt-2.5 border-t border-slate-200/60 w-full">
-                      <h4 className="font-bold text-slate-800 text-xs sm:text-sm group-hover:text-blue-600 transition-colors">
-                        {dist.name}
-                      </h4>
-                      <p className="text-[10px] sm:text-[11px] text-slate-400 truncate mt-0.5 font-medium">
-                        {dist.desc}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <p className="text-[11px] sm:text-xs text-slate-500 font-normal">
+                Hover over any brand to pause rotation
+              </p>
             </div>
+          </div>
+        </div>
+
+        {/* Full screen-width embedded conveyor belt track with edge gradient masks */}
+        <div className="relative w-full overflow-hidden py-4">
+          {/* Gradient fade on left and right edge */}
+          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-20 sm:w-36 bg-gradient-to-r from-[#FAFAFC] via-[#FAFAFC]/80 to-transparent z-10" />
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-20 sm:w-36 bg-gradient-to-l from-[#FAFAFC] via-[#FAFAFC]/80 to-transparent z-10" />
+
+          {/* Continuous Conveyor Belt */}
+          <div className="animate-conveyor gap-5 items-stretch py-2">
+            {conveyorDistributors.map((dist, idx) => (
+              <div
+                key={idx}
+                className="group w-52 sm:w-60 shrink-0 bg-white p-4 rounded-2xl border border-slate-200/80 hover:border-blue-400 hover:shadow-xl transition-all duration-300 text-center flex flex-col items-center justify-between min-h-[130px]"
+              >
+                <div className="h-14 w-full flex items-center justify-center p-1">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={dist.logo}
+                    alt={`${dist.name} Authorized Distributor`}
+                    className="max-h-11 max-w-[110px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+
+                <div className="pt-2.5 border-t border-slate-100 w-full">
+                  <h4 className="font-bold text-slate-800 text-xs sm:text-sm group-hover:text-blue-600 transition-colors">
+                    {dist.name}
+                  </h4>
+                  <p className="text-[10px] sm:text-[11px] text-slate-400 truncate mt-0.5 font-medium">
+                    {dist.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
