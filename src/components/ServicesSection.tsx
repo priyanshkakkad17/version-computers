@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ORIGINAL_SERVICES, ORIGINAL_DISTRIBUTORS } from '@/data/products';
 import {
   Laptop,
@@ -13,6 +13,27 @@ import {
 } from 'lucide-react';
 
 export default function ServicesSection() {
+  const ladderRef = useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState<number>(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!ladderRef.current) return;
+      const rect = ladderRef.current.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+
+      // Start filling when top of ladder enters halfway from bottom
+      const totalDist = rect.height;
+      const currentPassed = windowHeight * 0.7 - rect.top;
+      const progress = Math.min(Math.max(currentPassed / totalDist, 0), 1);
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const getServiceIcon = (id: string) => {
     switch (id) {
       case 'computers-laptops':
@@ -62,14 +83,30 @@ export default function ServicesSection() {
         {/* ======================================================== */}
         {/* ACTUAL LADDER: Side-by-side alternating left & right     */}
         {/* ======================================================== */}
-        <div className="relative mb-28">
-          {/* Central Vertical Ladder Spine (desktop & tablet) */}
-          <div className="hidden md:block absolute left-1/2 top-4 bottom-4 -translate-x-1/2 w-0.5 bg-gradient-to-b from-blue-300 via-indigo-300 to-blue-200" />
+        <div ref={ladderRef} className="relative mb-28">
+          {/* Base Neutral Track Line */}
+          <div className="hidden md:block absolute left-1/2 top-4 bottom-4 -translate-x-1/2 w-1 bg-slate-200 rounded-full" />
+
+          {/* Dynamic Scroll-Activated Moving Center Line */}
+          <div
+            className="hidden md:block absolute left-1/2 top-4 -translate-x-1/2 w-1 bg-gradient-to-b from-blue-600 via-indigo-600 to-sky-400 rounded-full transition-all duration-150 ease-out z-10"
+            style={{
+              height: `calc(${scrollProgress * 100}% - 32px)`,
+              maxHeight: 'calc(100% - 32px)',
+            }}
+          >
+            {/* Glowing tracer spark at the head of the moving line */}
+            {scrollProgress > 0.05 && (
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-blue-500 shadow-[0_0_12px_#3b82f6] animate-pulse" />
+            )}
+          </div>
 
           {/* Ladder Items Container */}
           <div className="space-y-12 md:space-y-16">
             {ORIGINAL_SERVICES.map((srv, idx) => {
               const isEven = idx % 2 === 0; // 0, 2 on Left; 1, 3 on Right
+              const stepRatio = (idx + 0.3) / ORIGINAL_SERVICES.length;
+              const isPassed = scrollProgress >= stepRatio;
 
               return (
                 <div
@@ -148,17 +185,35 @@ export default function ServicesSection() {
                   </div>
 
                   {/* Central Ladder Step Node (only visible on tablet & desktop) */}
-                  <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center justify-center pointer-events-none">
-                    <div className="w-10 h-10 rounded-full bg-white border-4 border-blue-500 shadow-md flex items-center justify-center z-20">
-                      <span className="w-3 h-3 rounded-full bg-blue-600"></span>
+                  <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center justify-center pointer-events-none z-20">
+                    <div
+                      className={`w-10 h-10 rounded-full bg-white border-4 transition-all duration-500 flex items-center justify-center shadow-md ${
+                        isPassed
+                          ? 'border-blue-600 scale-110 shadow-blue-500/30'
+                          : 'border-slate-300'
+                      }`}
+                    >
+                      <span
+                        className={`w-3.5 h-3.5 rounded-full transition-colors duration-500 ${
+                          isPassed ? 'bg-blue-600' : 'bg-slate-300'
+                        }`}
+                      />
                     </div>
 
                     {/* Horizontal ladder rung connecting to card */}
                     <div
-                      className={`absolute top-1/2 -translate-y-1/2 h-0.5 bg-gradient-to-r ${
+                      className={`absolute top-1/2 -translate-y-1/2 h-0.5 transition-all duration-500 ${
                         isEven
-                          ? 'right-1/2 w-8 from-transparent to-blue-400'
-                          : 'left-1/2 w-8 from-blue-400 to-transparent'
+                          ? `right-1/2 w-8 ${
+                              isPassed
+                                ? 'bg-gradient-to-r from-transparent to-blue-600'
+                                : 'bg-gradient-to-r from-transparent to-slate-200'
+                            }`
+                          : `left-1/2 w-8 ${
+                              isPassed
+                                ? 'bg-gradient-to-r from-blue-600 to-transparent'
+                                : 'bg-gradient-to-r from-slate-200 to-transparent'
+                            }`
                       }`}
                     />
                   </div>
